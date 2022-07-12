@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class Student {
     String student_id;
     String student_name;
@@ -15,4 +14,13 @@ public class Student {
     String contact;
     String address;
     String nic;
+
+    public Student(String student_id, String student_name, String email, String contact, String address, String nic) {
+        this.student_id = student_id;
+        this.student_name = student_name;
+        this.email = email;
+        this.contact = contact;
+        this.address = address;
+        this.nic = nic;
+    }
 }

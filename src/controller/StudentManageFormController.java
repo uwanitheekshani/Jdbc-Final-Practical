@@ -7,9 +7,12 @@ import javafx.event.ActionEvent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
+import model.Student;
 import util.CrudUtil;
 import view.tm.StudentTM;
 
@@ -41,7 +44,7 @@ public class StudentManageFormController {
         loadAllStudents();
 
 
-        btnSaveStudent.setDisable(true);
+        //btnSaveStudent.setDisable(true);
 
 
 
@@ -61,7 +64,7 @@ public class StudentManageFormController {
                 StudentTM selectedItem= tblStudent.getSelectionModel().getSelectedItem();
                 txtStudentId.setText(selectedItem.getStudent_id());
 
-
+                
                 deleteStudentOnAction();
                 txtStudentId.setText("");
 
@@ -113,6 +116,13 @@ public class StudentManageFormController {
     }
 
     private void clearAllTexts() {
+        txtStudentId.clear();
+        txtStudentName.clear();
+        txtStudentEmail.clear();
+        txtStudentContact.clear();
+        txtStudentAddress.clear();
+        txtStudentNic.clear();
+        txtStudentId.requestFocus();
     }
 
     private void search() throws SQLException, ClassNotFoundException {
@@ -144,17 +154,67 @@ public class StudentManageFormController {
 
 
     public void txtSearchOnAction(ActionEvent actionEvent) {
+        try {
+            search();
+        } catch (ClassNotFoundException |SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public void studentIdKeyPressed(KeyEvent keyEvent) {
+        if (keyEvent.getCode()== KeyCode.ENTER){
+            txtStudentName.requestFocus();
+        }
+
     }
 
-    public void textField_key_Released(KeyEvent keyEvent) {
-    }
 
     public void btnSearchOnAction(ActionEvent actionEvent) {
+        try {
+            search();
+        } catch (ClassNotFoundException |SQLException e) {
+            e.printStackTrace();
+        }
     }
 
-    public void saveStudentOnAction(ActionEvent actionEvent) {
+    public void saveStudentOnAction(ActionEvent actionEvent) throws SQLException, ClassNotFoundException {
+
+        if (btnSaveStudent.getText().equals("Update")){
+            Student s = new Student(
+                    txtStudentId.getText(),txtStudentName.getText(), txtStudentEmail.getText(),txtStudentContact.getText(),txtStudentAddress.getText(),txtStudentNic.getText());
+
+            try{
+                boolean isUpdated = CrudUtil.execute("UPDATE Student SET student_name=? , email=? , contact=? , address=? , nic=? WHERE student_id=?",s.getStudent_name(),s.getEmail(),s.getContact(),s.getAddress(),s.getNic());
+                if (isUpdated){
+                    new Alert(Alert.AlertType.CONFIRMATION, "Updated!").show();
+                    loadAllStudents();
+                    btnSaveStudent.setText("Save Student");
+                }else{
+                    new Alert(Alert.AlertType.WARNING, "Try Again!").show();
+                }
+
+
+            }catch (SQLException | ClassNotFoundException e){
+
+            }
+        }else {
+            Student st = new Student(
+                    txtStudentId.getText(),txtStudentName.getText(), txtStudentEmail.getText(), txtStudentContact.getText(),txtStudentAddress.getText(),txtStudentNic.getText()
+            );
+
+            try {
+                if (CrudUtil.execute("INSERT INTO Student VALUES (?,?,?,?,?,?)",st.getStudent_id(),st.getStudent_name(),st.getEmail(),st.getContact(),st.getAddress(),st.getNic())){
+                    new Alert(Alert.AlertType.CONFIRMATION, "Saved!..").show();
+                    //btnSaveStudent.setDisable(true);
+                }
+            } catch (ClassNotFoundException | SQLException e) {
+                e.printStackTrace();
+                new Alert(Alert.AlertType.ERROR, e.getMessage()).show();
+            }
+
+            clearAllTexts();
+            loadAllStudents();
+
+        }
     }
 }
